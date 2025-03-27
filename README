@@ -2,15 +2,6 @@
 
 # A Simple RPC-based Distributed Computing Platform
 
-# Team members: 
-(1) Name:  Samarendra Pitta. CSUID: 2885323.
-(2) Name: Lakshmi Laazwanthi Marella. CSUID: 2886174. 
-
-
-# The group member contribution percentile: e.g., 50%-50%.
-Samarendra Pitta 50%.
-Lakshmi Laazwanthi Marella 50%.
-
 
 # Design Details - (This system supports upto 5 servers).
 This project is basically implementing a simple RPC-based distributed computing platform. 
@@ -224,5 +215,3 @@ Job 10 started with Process_ID 708471
 # Known Issues (if any):
 All the modules are working fine.
 
-# Bonus point:
-Tried to implement but Grail has GTK3 and also it said header file"#include <gtk/gtk.h>" missing.
