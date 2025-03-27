@@ -1,0 +1,228 @@
+# Group-4
+
+# A Simple RPC-based Distributed Computing Platform
+
+# Team members: 
+(1) Name:  Samarendra Pitta. CSUID: 2885323.
+(2) Name: Lakshmi Laazwanthi Marella. CSUID: 2886174. 
+
+
+# The group member contribution percentile: e.g., 50%-50%.
+Samarendra Pitta 50%.
+Lakshmi Laazwanthi Marella 50%.
+
+
+# Design Details - (This system supports upto 5 servers).
+This project is basically implementing a simple RPC-based distributed computing platform. 
+This system consists of a client (replicator_client) and a server (replicator_server) that communicate via Sun RPC. 
+The client reads a list of server hostnames from ./replicate.hosts and distributes jobs to them. The server executes the hyper_link binary for simulation jobs and supports basic RPC commands.
+
+The design of this system was first the client will read the hostnames and make connection with the hostnames specified in replicate.hosts file.
+Then when the command is entered in console, the command is executing by calling remote procedure call as like normal call. First the client stub will make a rpc call to server stub.
+The server stub will ask server to execture it, after executing the server stub will send reesults to client.
+The servers can be manually started and stopped. We can set the high and low threshhold values, if not default values are set.
+When the cpuload exceeds high threshhold then the server is stopped and then jobs under that server is killed and rescheduled to other server or will start when the server is started again.
+IF the server is craashed then cleitn will reschedule jobs to other servers.
+We monitor the cpuload for all the servers using cpuload command. If any of the server is inactive then cpuload is not shown for that server. cpuload is shown only for server which is active.
+All the jobs are equally split into all the servers in a round robin fashion. So that all the servers get the same number of jobs.
+
+- Client Console: The client program launches an interactive shell where users can execute commands to distribute and manage jobs on multiple servers.  
+- Job Execution: The client divides a large task into smaller jobs and assigns them to available servers. Each server executes `hyper_link` with specified parameters.  
+- Server Management: Servers can be manually started or stopped. If CPU load exceeds a threshold, the server stops accepting new jobs until its load decreases.  
+- Fault Tolerance: If a server crashes or a job is killed, the client reschedules the job on another available server.  
+- CPU Load Monitoring: The client periodically checks server load via `/proc/loadavg` and dynamically adjusts job assignments. 
+
+
+# Compiling instruction and execution sequence (with commands)
+
+# Step 1: Generate the server and client stub and compile the client and server codes.
+
+Run the following command to generate RPC stub files and compile the scripts:  make
+This will create server stub and client stub files "replicator_clnt.c", "replicator_svc.c", "replicator.h", "replicator_xdr.c".  
+This will also generate the following executables:
+- replicator_client
+- replicator_server
+
+# step2:
+Before running client and server, In replicator.hosts file mention hostnames or else leave it. It contains 5 hostnames.
+137.148.204.22
+137.148.204.21
+137.148.204.23
+137.148.204.20
+137.148.204.19
+
+# Step3: To Run the Servers
+run the following command to run the server: ./replicator_server
+I have listed the hostnames, So just need to see the hostnames specified in replicator.hosts and run the server instances in those machines.
+This code supports 5 servers. So run it in 5 machines specified below, or else your choice by modifying the replicator.hosts file.
+137.148.204.22
+137.148.204.21
+137.148.204.23
+137.148.204.20
+137.148.204.19
+
+# step4: 
+run the client: ./replicator_client
+Run this in another machine may be in 6th machine.
+This will start the Replicator Console, allowing users to control the distributed system.
+
+# step5:
+First type help command in client console to see, what type of commands this system executes.
+check the sample test case below.
+
+# step6:
+View output in replicate_out folder when you see the message in client console,"all jobs completed successfully messsage".
+Try refreshing the folder upto 1 minutes you can see the output in all the files.
+
+# step7:
+To clean the generated files: make clean
+
+# A sample test run:
+
+sapitta@spirit:~/ADVOS/Project2_1$ make
+rpcgen -C replicator.x
+cp replicator_clnt.c Client/
+cp replicator_svc.c Server/
+cp replicator_xdr.c Client/
+cp replicator_xdr.c Server/
+cp replicator.h Client/
+cp replicator.h Server/
+gcc -g -Wall -I. -pthread -Wno-unused-variable -IClient -o replicator_client Client/replicator_client.c Client/replicator_clnt.c Client/replicator_xdr.c -lnsl -pthread
+gcc -g -Wall -I. -pthread -Wno-unused-variable -IServer -o replicator_server Server/replicator_server.c Server/replicator_svc.c Server/replicator_xdr.c -lnsl -pthread
+sapitta@spirit:~/ADVOS/Project2_1$ 
+
+
+# Client console:
+sapitta@spirit:~/ADVOS/Project2_1$ ./replicator_client
+Commands:
+        start <hostname> - Start specific server
+        stop <hostname> - Stop specific server
+        status - Show status of all servers
+        cpuload - Show CPU load of all servers
+        add <x> <y> - Additrion operation
+        subtract <x> <y> - subtraction
+        multiply <x> <y> - Perform multiplication
+        power <x> <y> - Exponentiation
+        hyper_link <start> <end> <step> - Run jobs in the background
+        set_highthresh <value> - set cpu high threshhold
+        set_lowthresh <value> - set cpu low threshhold
+        exit - quit the shell
+Console> status
+ 127.0.0.1 : Active
+ 127.0.0.2 : Active
+ 127.0.0.3 : Active
+ 127.0.0.4 : Active
+ 127.0.0.5 : Active
+Console> cpuload
+127.0.0.1: 0.80
+127.0.0.2: 0.80
+127.0.0.3: 0.80
+127.0.0.4: 0.80
+127.0.0.5: 0.80
+Console> add 34 2
+Addition Result: 36
+Console> multiplly 12 2
+Unknown input command. Type 'help' to list the available commands.
+Console> multiply 12 2
+Multiplication Result: 24
+Console> stop 127.0.0.1
+Server 127.0.0.1 stopped successfully.
+Console> status
+ 127.0.0.1 : Inactive
+ 127.0.0.2 : Active
+ 127.0.0.3 : Active
+ 127.0.0.4 : Active
+ 127.0.0.5 : Active
+Console> cpuload
+127.0.0.2: 0.89
+127.0.0.3: 0.89
+127.0.0.4: 0.89
+127.0.0.5: 0.89
+Console> start 127.0.0.1
+Server 127.0.0.1 is started successfully.
+Console> status
+ 127.0.0.1 : Active
+ 127.0.0.2 : Active
+ 127.0.0.3 : Active
+ 127.0.0.4 : Active
+ 127.0.0.5 : Active
+Console> cpuload
+127.0.0.1: 1.05
+127.0.0.2: 1.05
+127.0.0.3: 1.05
+127.0.0.4: 1.05
+127.0.0.5: 1.05
+Console> set_highthresh 6.5
+High CPU threshold set to 6.50
+Console> set_lowthresh 1.5
+Low CPU threshold set to 1.50
+Console> hyper_link 1 10 1 1000000 999 1 2 2 1 
+Jobs started in background. the console will accpet new commands to test the cpuload or any.
+Console> status
+ 127.0.0.1 : Active
+ 127.0.0.2 : Active
+ 127.0.0.3 : Active
+ 127.0.0.4 : Active
+ 127.0.0.5 : Active
+Console> cpuload
+127.0.0.1: 2.87
+127.0.0.2: 2.87
+127.0.0.3: 2.87
+127.0.0.4: 2.87
+127.0.0.5: 2.87
+Console> cpuload
+127.0.0.1: 3.45
+127.0.0.2: 3.45
+127.0.0.3: 3.45
+127.0.0.4: 3.45
+127.0.0.5: 3.45
+Console> all jobs completed successfully.
+cpuload
+127.0.0.1: 6.71
+127.0.0.2: 6.71
+127.0.0.3: 6.71
+127.0.0.4: 6.71
+127.0.0.5: 6.71
+Console> cpuload
+127.0.0.1: 7.05
+127.0.0.2: 7.05
+127.0.0.3: 7.05
+127.0.0.4: 7.05
+127.0.0.5: 7.05
+Console> exit
+sapitta@spirit:~/ADVOS/Project2_1$ 
+
+
+# replicator_server:
+
+sapitta@spirit:~/ADVOS/Project2_1$ ./replicator_server
+Server has been stopped successfully.
+Server started.
+Job 1 started with Process_ID 708454
+Job 2 started with Process_ID 708455
+Job 3 started with Process_ID 708456
+Job 4 started with Process_ID 708457
+Job 5 started with Process_ID 708459
+Job 6 started with Process_ID 708462
+Job 7 started with Process_ID 708465
+Job 8 started with Process_ID 708467
+Job 9 started with Process_ID 708469
+Job 10 started with Process_ID 708471
+
+#output in replicate_out:
+1:1000000:999:2:0.5:1.125193e+00:2.377443e-04:6.251640e-01:2.134006e-04:0.000000e+00:0.000000e+00
+2:1000000:999:2:0.25:5.450179e-01:5.990325e-05:4.448468e-02:2.675807e-05:5.530681e-04:3.656579e-06
+3:1000000:999:2:0.166667:5.045661e-01:4.549675e-05:3.839708e-03:5.114100e-06:6.998713e-04:4.384451e-06
+.
+.
+.
+.
+9:1000000:999:2:0.0555556:5.007338e-01:4.413092e-05:1.128741e-11:2.212291e-11:7.274290e-04:4.593956e-06
+10:1000000:999:2:0.05:5.007531e-01:4.411556e-05:0.000000e+00:0.000000e+00:7.237197e-04:4.519405e-06
+
+
+# Known Issues (if any):
+All the modules are working fine.
+
+# Bonus point:
+Tried to implement but Grail has GTK3 and also it said header file"#include <gtk/gtk.h>" missing.
